@@ -1,6 +1,7 @@
 package book
 
 import (
+	"fmt"
 	. "github.com/fishedee/language"
 	"github.com/fishedee/web"
 )
@@ -12,6 +13,7 @@ type BookAoModel struct {
 
 // 添加书本
 func (this *BookAoModel) AddBook(bookCode string, bookName string, userid int) {
+
 	if bookCode == "" || bookName == "" {
 		Throw(1, "图书编码或者图书名字为空")
 	}
@@ -57,11 +59,11 @@ func (this *BookAoModel) EditBook(bookid int, bookcode string, bookname string, 
 func (this *BookAoModel) DeleteBook(bid int) {
 
 	// 验证书本信息是否存在
-	books := this.BookDb.QueryBookByID(bid)
-	if len(books) == 0 {
-		msg := "不存在ID为：[" + string(bid) + "] 的书本信息记录"
-		Throw(1, msg)
-	}
+	this.BookDb.QueryBookByID(bid)
+	//if len(books) == 0 {
+	//	msg := "不存在ID为：[" + string(bid) + "] 的书本信息记录"
+	//	Throw(1, msg)
+	//}
 
 	// 删除书本信息
 	this.BookDb.DeleteBook(bid)
@@ -73,8 +75,9 @@ func (this *BookAoModel) QueryBookByID(bid int) []Book {
 
 	// 验证书本信息是否存在
 	books = this.BookDb.QueryBookByID(bid)
+	clientIdString := fmt.Sprintf("%v", bid)
 	if len(books) == 0 {
-		msg := "不存在ID为：[" + string(bid) + "] 的书本信息记录"
+		msg := "不存在ID为：[" + clientIdString + "] 的书本信息记录"
 		Throw(1, msg)
 	}
 

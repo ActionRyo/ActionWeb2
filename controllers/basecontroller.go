@@ -16,13 +16,19 @@ type BaseController struct {
 }
 
 func (this *BaseController) AutoRender(data interface{}, viewname string) {
-	exception, isException := data.(Exception)
-	if isException {
-		this.Ctx.Write([]byte(exception.GetMessage()))
-		return
-	}
 	httpRequest := this.Ctx.GetRawRequest().(*http.Request)
 	httpResponseWriter := this.Ctx.GetRawResponseWriter().(http.ResponseWriter)
+
+	exception, isException := data.(Exception)
+	if isException {
+		if exception.GetCode() == 10001 {
+			http.Redirect(httpResponseWriter, httpRequest, "/home/login", http.StatusFound)
+			return
+		} else {
+			this.Ctx.Write([]byte(exception.GetMessage()))
+		}
+		return
+	}
 
 	//跳转的输出
 	redirectInfo, isRedirect := data.(redirectOut)

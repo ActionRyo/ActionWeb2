@@ -3,8 +3,8 @@ package controllers
 import (
 	"ActionWeb2/models/book"
 	"ActionWeb2/models/user"
-	"fmt"
-	"strconv"
+	//"fmt"
+	//"strconv"
 )
 
 type MainController struct {
@@ -60,23 +60,9 @@ func (this *MainController) Logout_HtmlLogout() interface{} {
 // 添加书本信息
 func (this *MainController) AddBook_HtmlAddBook() interface{} {
 
-	sess, err := this.Session.SessionStart()
-	if err != nil {
-		panic(err)
-	}
-
-	defer sess.SessionRelease()
-	userid := sess.Get("UserId")
-
-	if userid == nil {
+	userId := this.UserAo.CheckMustLogin()
+	if userId == 0 {
 		return redirectOut{url: "/home/login"}
-	}
-
-	// 转换为整形
-	clientIdString := fmt.Sprintf("%v", userid)
-	clientIdInt, errs := strconv.Atoi(clientIdString)
-	if errs != nil {
-		panic(errs)
 	}
 
 	if this.Ctx.GetMethod() == "POST" {
@@ -86,7 +72,7 @@ func (this *MainController) AddBook_HtmlAddBook() interface{} {
 		}
 		this.CheckPost(&input)
 
-		this.BookAo.AddBook(input.Code, input.Name, clientIdInt)
+		this.BookAo.AddBook(input.Code, input.Name, userId)
 
 		return redirectOut{url: "/home/main"}
 	}
@@ -96,33 +82,24 @@ func (this *MainController) AddBook_HtmlAddBook() interface{} {
 // 编辑图书信息
 func (this *MainController) EditBook_HtmlEditBook() interface{} {
 
-	sess, err := this.Session.SessionStart()
-	if err != nil {
-		panic(err)
-	}
-
-	userid := sess.Get("UserId")
-	defer sess.SessionRelease()
-	if userid == nil {
+	userId := this.UserAo.CheckMustLogin()
+	if userId == 0 {
 		return redirectOut{url: "/home/login"}
 	}
 
-	// 转换为整形
-	clientIdString := fmt.Sprintf("%v", userid)
-	clientIdInt, errs := strconv.Atoi(clientIdString)
-	if errs != nil {
-		panic(errs)
-	}
-
 	if this.Ctx.GetMethod() == "GET" {
-		bid := this.Ctx.GetParam("bid")
-		clientIdString := fmt.Sprintf("%v", bid)
-		clientIdInt, err := strconv.Atoi(clientIdString)
-
-		if err != nil {
-			panic(err)
+		// 获取URL的值
+		var input struct {
+			Bid int
 		}
-		book := this.BookAo.QueryBookByID(clientIdInt)
+
+		this.CheckGet(&input)
+		//clientIdString := fmt.Sprintf("%v", input.Bid)
+		//clientIdInt, err := strconv.Atoi(clientIdString)
+		//if err != nil {
+		//	panic(err)
+		//}
+		book := this.BookAo.QueryBookByID(input.Bid)
 
 		return book[0]
 	}
@@ -135,11 +112,7 @@ func (this *MainController) EditBook_HtmlEditBook() interface{} {
 		}
 		this.CheckPost(&input)
 
-		if clientIdInt == 0 {
-			return redirectOut{url: "/home/login"}
-		}
-
-		this.BookAo.EditBook(input.Bookid, input.Code, input.Name, clientIdInt)
+		this.BookAo.EditBook(input.Bookid, input.Code, input.Name, userId)
 
 		return redirectOut{url: "/home/main"}
 	}
@@ -149,26 +122,26 @@ func (this *MainController) EditBook_HtmlEditBook() interface{} {
 
 // 删除图书信息
 func (this *MainController) DelBook_HtmlDelBook() interface{} {
-	sess, err := this.Session.SessionStart()
-	if err != nil {
-		panic(err)
-	}
-
-	userid := sess.Get("UserId")
-	defer sess.SessionRelease()
-	if userid == nil {
+	uid := this.UserAo.CheckMustLogin()
+	if uid == 0 {
 		return redirectOut{url: "/home/login"}
 	}
 
 	// 获取URL的值
-	bid := this.Ctx.GetParam("bid")
-	clientIdString := fmt.Sprintf("%v", bid)
-	clientIdInt, err := strconv.Atoi(clientIdString)
-	if err != nil {
-		panic(err)
+	var input struct {
+		Bid int
 	}
 
-	this.BookAo.DeleteBook(clientIdInt)
+	this.CheckGet(&input)
+
+	//clientIdString := fmt.Sprintf("%v", input.Bid)
+	//clientIdInt, err := strconv.Atoi(clientIdString)
+
+	//if err != nil {
+	//	panic(err)
+	//}
+
+	this.BookAo.DeleteBook(input.Bid)
 
 	return redirectOut{url: "/home/main"}
 }

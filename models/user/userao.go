@@ -1,8 +1,10 @@
 package user
 
 import (
+	"fmt"
 	. "github.com/fishedee/language"
 	"github.com/fishedee/web"
+	"strconv"
 )
 
 type UserAoModel struct {
@@ -31,11 +33,32 @@ func (this *UserAoModel) Login(name string, password string) {
 
 func (this *UserAoModel) Logout() {
 	sess, err := this.Session.SessionStart()
+
 	if err != nil {
 		panic(err)
 	}
+
 	sess.Delete("UserId")
 	defer sess.SessionRelease()
+}
+
+// 验证Session是否过期
+func (this *UserAoModel) CheckMustLogin() int {
+	sess, err := this.Session.SessionStart()
+	if err != nil {
+		Throw(10001, "调用Session失败")
+	}
+
+	defer sess.SessionRelease()
+	userid := sess.Get("UserId")
+
+	clientIdString := fmt.Sprintf("%v", userid)
+	clientIdInt, err := strconv.Atoi(clientIdString)
+	if err != nil {
+		return 0
+	}
+
+	return clientIdInt
 }
 
 func (this *UserAoModel) Register(name string, password string) {
