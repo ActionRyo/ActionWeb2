@@ -83,9 +83,6 @@ func (this *MainController) AddBook_HtmlAddBook() interface{} {
 func (this *MainController) EditBook_HtmlEditBook() interface{} {
 
 	userId := this.UserAo.CheckMustLogin()
-	if userId == 0 {
-		return redirectOut{url: "/home/login"}
-	}
 
 	if this.Ctx.GetMethod() == "GET" {
 		// 获取URL的值
@@ -122,10 +119,7 @@ func (this *MainController) EditBook_HtmlEditBook() interface{} {
 
 // 删除图书信息
 func (this *MainController) DelBook_HtmlDelBook() interface{} {
-	uid := this.UserAo.CheckMustLogin()
-	if uid == 0 {
-		return redirectOut{url: "/home/login"}
-	}
+	this.UserAo.CheckMustLogin()
 
 	// 获取URL的值
 	var input struct {

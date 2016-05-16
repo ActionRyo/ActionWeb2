@@ -55,7 +55,11 @@ func (this *UserAoModel) CheckMustLogin() int {
 	clientIdString := fmt.Sprintf("%v", userid)
 	clientIdInt, err := strconv.Atoi(clientIdString)
 	if err != nil {
-		return 0
+		clientIdInt = 0
+	}
+
+	if clientIdInt == 0 {
+		Throw(10001, "用户没有登陆")
 	}
 
 	return clientIdInt
